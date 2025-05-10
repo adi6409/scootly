@@ -21,6 +21,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import dev.astroianu.scootly.data.Provider
 import dev.astroianu.scootly.data.Scooter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,6 +29,7 @@ import kotlinx.coroutines.withContext
 
 @Composable
 actual fun MapComponent(
+    providers: List<Provider>,
     scooters: List<Scooter>
 ) {
     val context = LocalContext.current
@@ -47,7 +49,10 @@ actual fun MapComponent(
                     MapIconLoader.getIconFlow(
                         context = context,
                         providerName = scooter.providerName,
-                        url = scooter.providerIcon,
+                        url = providers
+                            .firstOrNull { it.id == scooter.providerId }
+                            ?.icon
+                            ?: "",
                         placeHolder = R.drawable.ic_launcher_foreground
                     )
                 }

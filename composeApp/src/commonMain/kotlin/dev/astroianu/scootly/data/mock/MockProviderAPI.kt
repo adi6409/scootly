@@ -10,7 +10,8 @@ class MockProviderAPI: ProviderAPI {
         Provider(
             id = "lime_tel_aviv",
             name = "Lime",
-            gbfsEndpoint = "https://data.lime.bike/api/partners/v2/gbfs/tel_aviv/",
+            icon = "https://www.li.me/favicon.ico",
+            gbfsEndpoint = "https://data.lime.bike/api/partners/v2/gbfs/tel_aviv",
             gbfsEndpoints = listOf(
                 GbfsEndpoints.SYSTEM_INFORMATION,
                 GbfsEndpoints.STATION_INFORMATION,
@@ -24,7 +25,8 @@ class MockProviderAPI: ProviderAPI {
         Provider(
             id = "bird_tel_aviv",
             name = "Bird",
-            gbfsEndpoint = "https://mds.bird.co/gbfs/v2/public/tel-aviv/",
+            gbfsEndpoint = "https://mds.bird.co/gbfs/v2/public/tel-aviv",
+            icon = "https://downloadr2.apkmirror.com/wp-content/uploads/2018/07/5b47c64218d9b.png",
             gbfsEndpoints = listOf(
                 GbfsEndpoints.FREE_BIKE_STATUS,
                 GbfsEndpoints.GBFS_VERSIONS,
@@ -41,7 +43,8 @@ class MockProviderAPI: ProviderAPI {
         Provider(
             id = "dott_tel_aviv",
             name = "Dott",
-            gbfsEndpoint = "https://gbfs.api.ridedott.com/public/v2/tel-aviv/",
+            gbfsEndpoint = "https://gbfs.api.ridedott.com/public/v2/tel-aviv",
+            icon = "https://ridedott.com/wp-content/uploads/2024/04/cropped-dottlogo90x90-entrance-logo-200x100cm-32x32.png",
             gbfsEndpoints = listOf(
                 GbfsEndpoints.GBFS_VERSIONS,
                 GbfsEndpoints.FREE_BIKE_STATUS,

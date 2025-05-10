@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitViewController
 import androidx.compose.ui.window.ComposeUIViewController
+import dev.astroianu.scootly.data.Provider
 import dev.astroianu.scootly.data.Scooter
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIViewController
@@ -20,7 +21,10 @@ lateinit var mapViewController: () -> UIViewController
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun MapComponent(scooters: List<Scooter>) {
+actual fun MapComponent(
+    providers: List<Provider>,
+    scooters: List<Scooter>
+) {
     UIKitViewController(
         factory = mapViewController,
         modifier = Modifier.fillMaxSize(),

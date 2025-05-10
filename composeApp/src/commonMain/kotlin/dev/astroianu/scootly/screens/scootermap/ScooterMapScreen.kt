@@ -11,5 +11,6 @@ fun ScooterMapScreen(
     scooterMapViewModel: ScooterMapViewModel = koinInject()
 ) {
     val scooters by scooterMapViewModel.scooters.collectAsState()
-    MapComponent(scooters)
+    val providers by scooterMapViewModel.providers.collectAsState()
+    MapComponent(providers, scooters)
 }

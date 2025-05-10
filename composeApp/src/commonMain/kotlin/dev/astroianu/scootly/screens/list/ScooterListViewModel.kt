@@ -44,12 +44,12 @@ class ScooterListViewModel(
             if (providerId == "") {
                 // Select all providers
                 _selectedProvider.value = null
-                _scooters.value = scooterRepository.getScooters("")
+                _scooters.value = scooterRepository.getScooters()
             } else {
                 val provider = providerRepository.getProviderById(providerId)
                 _selectedProvider.value = provider
                 if (provider != null) {
-                    _scooters.value = scooterRepository.getScooters(provider.id)
+                    _scooters.value = scooterRepository.getScooters(provider)
                 } else {
                     _scooters.value = emptyList()
                 }

@@ -2,10 +2,13 @@ package dev.astroianu.scootly.di
 
 import dev.astroianu.scootly.data.ProviderAPI
 import dev.astroianu.scootly.data.ProviderRepository
+import dev.astroianu.scootly.data.ScooterAPI
 import dev.astroianu.scootly.data.ScooterRepository
 import dev.astroianu.scootly.data.mock.MockProviderAPI
 import dev.astroianu.scootly.data.mock.MockProviderRepository
+import dev.astroianu.scootly.data.mock.MockScooterAPI
 import dev.astroianu.scootly.data.mock.MockScooterRepository
+import dev.astroianu.scootly.data.remote.GbfsScooterAPI
 import dev.astroianu.scootly.screens.list.ScooterListViewModel
 import dev.astroianu.scootly.screens.scootermap.ScooterMapViewModel
 import io.ktor.client.HttpClient
@@ -34,12 +37,14 @@ val dataModule = module {
     single<ProviderAPI> { MockProviderAPI() }
     single<ProviderRepository> { MockProviderRepository(get()) }
 
-    single<ScooterRepository> { MockScooterRepository(get()).apply{ initialize() } }
+//    single<ScooterAPI> { MockScooterAPI() }
+    single<ScooterAPI> { GbfsScooterAPI(get()) }
+    single<ScooterRepository> { MockScooterRepository(get(), get()).apply{ initialize() } }
 }
 
 val viewModelModule = module {
     viewModel { ScooterListViewModel(get(), get()) }
-    viewModel { ScooterMapViewModel(get()) }
+    viewModel { ScooterMapViewModel(get(), get()) }
 }
 
 fun initKoin() {

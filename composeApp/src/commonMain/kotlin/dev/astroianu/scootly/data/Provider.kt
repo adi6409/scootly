@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class Provider(
     val id: String,
     val name: String,
+    val icon: String,
     val gbfsEndpoint: String,
     val gbfsEndpoints: List<GbfsEndpoints> = emptyList(),
     val features: List<ProviderFeature> = emptyList(),
