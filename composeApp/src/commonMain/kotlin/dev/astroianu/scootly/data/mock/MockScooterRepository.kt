@@ -1,9 +1,27 @@
 package dev.astroianu.scootly.data.mock
 
+import dev.astroianu.scootly.data.Provider
+import dev.astroianu.scootly.data.ProviderRepository
 import dev.astroianu.scootly.data.Scooter
 import dev.astroianu.scootly.data.ScooterRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
-class MockScooterRepository : ScooterRepository {
+class MockScooterRepository(
+    private val providerRepository: ProviderRepository
+) : ScooterRepository {
+
+    private var providers: List<Provider>? = emptyList()
+
+    private val scope = CoroutineScope(SupervisorJob())
+
+    fun initialize() {
+        scope.launch {
+            providers = providerRepository.getProviders()
+        }
+    }
+
     private val scootersByProvider = mapOf(
         "lime_tel_aviv" to listOf(
             Scooter(
@@ -64,6 +82,10 @@ class MockScooterRepository : ScooterRepository {
     )
 
     override suspend fun getScooters(providerId: String): List<Scooter> {
-        return scootersByProvider[providerId] ?: scootersByProvider.values.flatten()
+        return if (providerId == "") {
+            scootersByProvider.values.flatten()
+        } else {
+            scootersByProvider[providerId] ?: emptyList()
+        }
     }
 }

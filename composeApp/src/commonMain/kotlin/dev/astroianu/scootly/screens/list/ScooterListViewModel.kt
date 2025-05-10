@@ -1,5 +1,6 @@
 package dev.astroianu.scootly.screens.list
 
+import androidx.lifecycle.ViewModel
 import dev.astroianu.scootly.data.Provider
 import dev.astroianu.scootly.data.ProviderRepository
 import dev.astroianu.scootly.data.Scooter
@@ -15,10 +16,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ScooterListViewModel(
-    private val providerRepository: ProviderRepository = MockProviderRepository(),
-    private val scooterRepository: ScooterRepository = MockScooterRepository(),
+    private val providerRepository: ProviderRepository,
+    private val scooterRepository: ScooterRepository,
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-) {
+): ViewModel() {
     private val _providers = MutableStateFlow<List<Provider>>(emptyList())
     val providers: StateFlow<List<Provider>> = _providers.asStateFlow()
 

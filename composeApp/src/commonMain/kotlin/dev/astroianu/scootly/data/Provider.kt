@@ -9,7 +9,7 @@ data class Provider(
     val gbfsEndpoint: String,
     val gbfsEndpoints: List<GbfsEndpoints> = emptyList(),
     val features: List<ProviderFeature> = emptyList(),
-    val addJson: Boolean = true,
+    val addJson: Boolean = true
 )
 
 @Serializable

@@ -10,10 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.astroianu.scootly.data.Provider
 import dev.astroianu.scootly.data.Scooter
+import org.koin.compose.koinInject
 
 @Composable
 fun ScooterListScreen(
-    scooterListViewModel: ScooterListViewModel,
+    scooterListViewModel: ScooterListViewModel = koinInject(),
 ) {
     val providers by scooterListViewModel.providers.collectAsState()
     val selectedProvider by scooterListViewModel.selectedProvider.collectAsState()
