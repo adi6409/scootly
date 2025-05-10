@@ -4,7 +4,11 @@ import ComposeApp
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        MainViewControllerKt.MainViewController(
+            mapUIViewController: { () -> UIViewController in
+                return UIHostingController(rootView: GoogleMapView())
+            }
+        )
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}

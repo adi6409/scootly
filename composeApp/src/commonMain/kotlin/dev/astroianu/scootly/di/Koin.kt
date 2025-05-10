@@ -7,6 +7,7 @@ import dev.astroianu.scootly.data.mock.MockProviderAPI
 import dev.astroianu.scootly.data.mock.MockProviderRepository
 import dev.astroianu.scootly.data.mock.MockScooterRepository
 import dev.astroianu.scootly.screens.list.ScooterListViewModel
+import dev.astroianu.scootly.screens.scootermap.ScooterMapViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -38,6 +39,7 @@ val dataModule = module {
 
 val viewModelModule = module {
     viewModel { ScooterListViewModel(get(), get()) }
+    viewModel { ScooterMapViewModel(get()) }
 }
 
 fun initKoin() {
