@@ -27,6 +27,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+//            export("dev.icerock.moko:maps:0.6.0")
+//            export("dev.icerock.moko:maps-google:0.6.0")
         }
     }
     
@@ -46,18 +48,23 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.io.insert.koin.koin.core)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
+            implementation(libs.napier)
         }
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
-            implementation(libs.google.maps.android)
+            implementation(libs.google.maps.compose)
+            implementation(libs.google.maps.compose.utils)
             implementation(libs.glide)
+            implementation(libs.play.services.location)
+
 
         }
         iosMain.dependencies {

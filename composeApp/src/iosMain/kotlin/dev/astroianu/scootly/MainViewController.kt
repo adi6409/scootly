@@ -1,3 +1,4 @@
+// iosMain/kotlin/dev/astroianu/scootly/MainViewController.kt
 package dev.astroianu.scootly
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,14 +11,22 @@ import dev.astroianu.scootly.data.Scooter
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIViewController
 
-fun MainViewController(
-    mapUIViewController: () -> UIViewController
-) = ComposeUIViewController {
-    mapViewController = mapUIViewController
-    App()
-}
+// 1️⃣ The lateinit callback that MapComponent will invoke:
+lateinit var mapViewController: (providers: List<Provider>, scooters: List<Scooter>) -> UIViewController
 
-lateinit var mapViewController: () -> UIViewController
+/**
+ * This factory gets called by Swift—with your Swift closure—so that
+ * `mapViewController` is wired up before any Composable tries to use it.
+ */
+fun MainViewController(
+    mapUIViewController: (providers: List<Provider>, scooters: List<Scooter>) -> UIViewController
+): UIViewController =
+    ComposeUIViewController {
+        // assign the Swift closure into our lateinit var
+        mapViewController = mapUIViewController
+        // now start our shared Compose App
+        App()
+    }
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
@@ -25,8 +34,9 @@ actual fun MapComponent(
     providers: List<Provider>,
     scooters: List<Scooter>
 ) {
+    // this will now safely call the closure you passed in
     UIKitViewController(
-        factory = mapViewController,
+        factory = { mapViewController(providers, scooters) },
         modifier = Modifier.fillMaxSize(),
     )
 }

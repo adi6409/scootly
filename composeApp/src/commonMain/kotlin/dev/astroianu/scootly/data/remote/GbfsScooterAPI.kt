@@ -49,7 +49,7 @@ class GbfsScooterAPI(
                 id = bike.bikeId,
                 providerId = provider.id,
                 providerName = provider.name,
-                providerIcon = "", // No icon in Provider, set as empty or provide logic if available
+                providerIcon = provider.icon, // No icon in Provider, set as empty or provide logic if available
                 latitude = bike.lat,
                 longitude = bike.lon,
                 range = bike.range ?: 0.0,

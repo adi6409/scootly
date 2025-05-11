@@ -3,6 +3,7 @@ package dev.astroianu.scootly
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.annotation.DrawableRes
 import com.bumptech.glide.Glide
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -29,6 +30,7 @@ object MapIconLoader {
             MutableStateFlow<BitmapDescriptor?>(null).also { flow ->
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
+                        Log.d("MapIconLoader", "Loading icon for $providerName from $url")
                         val originalBitmap = Glide.with(context)
                             .asBitmap()
                             .load(url)

@@ -11,6 +11,8 @@ import dev.astroianu.scootly.data.mock.MockScooterRepository
 import dev.astroianu.scootly.data.remote.GbfsScooterAPI
 import dev.astroianu.scootly.screens.list.ScooterListViewModel
 import dev.astroianu.scootly.screens.scootermap.ScooterMapViewModel
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -18,7 +20,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
-
 
 
 val dataModule = module {
@@ -48,6 +49,7 @@ val viewModelModule = module {
 }
 
 fun initKoin() {
+    Napier.base(DebugAntilog())
     startKoin {
         modules(
             dataModule,
