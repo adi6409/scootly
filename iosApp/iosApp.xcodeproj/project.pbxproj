@@ -11,8 +11,8 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		0A25F44A2DCFC90A006E56BC /* GoogleMapsUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 0A25F4492DCFC90A006E56BC /* GoogleMapsUtils */; };
 		0A25F44C2DCFE892006E56BC /* GoogleMapContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A25F44B2DCFE88C006E56BC /* GoogleMapContainerView.swift */; };
-		0AA4CCA02DD103B700911E84 /* SharedMapContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA4CC9F2DD103B700911E84 /* SharedMapContainerView.swift */; };
-		0AA4CCA22DD10D4E00911E84 /* MainViewControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA4CCA12DD10D4E00911E84 /* MainViewControllerExtension.swift */; };
+		0AA4CCA62DD1733800911E84 /* MapIconLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA4CCA52DD1733800911E84 /* MapIconLoader.swift */; };
+		0AA4CCA82DD1736300911E84 /* ScooterClusterRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA4CCA72DD1736300911E84 /* ScooterClusterRenderer.swift */; };
 		0AAB87402DCF8AEE00C6CC01 /* GoogleMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAB873F2DCF8AEE00C6CC01 /* GoogleMaps */; };
 		0AAB87452DCF976D00C6CC01 /* BuildSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AAB87442DCF976D00C6CC01 /* BuildSettings.swift */; };
 		0AAB87472DCF996100C6CC01 /* GoogleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AAB87462DCF996100C6CC01 /* GoogleMapView.swift */; };
@@ -25,8 +25,8 @@
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		0A25F44B2DCFE88C006E56BC /* GoogleMapContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapContainerView.swift; sourceTree = "<group>"; };
-		0AA4CC9F2DD103B700911E84 /* SharedMapContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedMapContainerView.swift; sourceTree = "<group>"; };
-		0AA4CCA12DD10D4E00911E84 /* MainViewControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewControllerExtension.swift; sourceTree = "<group>"; };
+		0AA4CCA52DD1733800911E84 /* MapIconLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapIconLoader.swift; sourceTree = "<group>"; };
+		0AA4CCA72DD1736300911E84 /* ScooterClusterRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScooterClusterRenderer.swift; sourceTree = "<group>"; };
 		0AAB87432DCF96B800C6CC01 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		0AAB87442DCF976D00C6CC01 /* BuildSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildSettings.swift; sourceTree = "<group>"; };
 		0AAB87462DCF996100C6CC01 /* GoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapView.swift; sourceTree = "<group>"; };
@@ -87,6 +87,8 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				0AA4CCA72DD1736300911E84 /* ScooterClusterRenderer.swift */,
+				0AA4CCA52DD1733800911E84 /* MapIconLoader.swift */,
 				0A25F44B2DCFE88C006E56BC /* GoogleMapContainerView.swift */,
 				0AAB87482DCFC3FF00C6CC01 /* ScooterMapData.swift */,
 				0AAB87462DCF996100C6CC01 /* GoogleMapView.swift */,
@@ -96,8 +98,6 @@
 				7555FF8C242A565B00829871 /* Info.plist */,
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
-				0AA4CC9F2DD103B700911E84 /* SharedMapContainerView.swift */,
-				0AA4CCA12DD10D4E00911E84 /* MainViewControllerExtension.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -212,14 +212,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AA4CCA62DD1733800911E84 /* MapIconLoader.swift in Sources */,
 				0AAB87492DCFC40200C6CC01 /* ScooterMapData.swift in Sources */,
-				0AA4CCA02DD103B700911E84 /* SharedMapContainerView.swift in Sources */,
 				0AAB87472DCF996100C6CC01 /* GoogleMapView.swift in Sources */,
 				0A25F44C2DCFE892006E56BC /* GoogleMapContainerView.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				0AAB87452DCF976D00C6CC01 /* BuildSettings.swift in Sources */,
+				0AA4CCA82DD1736300911E84 /* ScooterClusterRenderer.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
-				0AA4CCA22DD10D4E00911E84 /* MainViewControllerExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -2,6 +2,7 @@ import SwiftUI
 import GoogleMaps
 import GoogleMapsUtils
 import CoreLocation
+import UIKit
 
 struct GoogleMapView: UIViewRepresentable {
     @ObservedObject var mapData: ScooterMapData
@@ -9,10 +10,11 @@ struct GoogleMapView: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIView(context: Context) -> GMSMapView {
-        let mapView = GMSMapView(frame: .zero)
+        let mapView = GMSMapView()
         mapView.delegate = context.coordinator
         mapView.settings.myLocationButton   = true
         mapView.isMyLocationEnabled         = true
+        mapView.settings.compassButton      = true
         mapView.settings.scrollGestures     = true
         mapView.settings.zoomGestures       = true
         mapView.settings.tiltGestures       = true
@@ -29,15 +31,23 @@ struct GoogleMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: GMSMapView, context: Context) {
-        context.coordinator.updateMarkers()
+        // Debug: Print the number of scooters in mapData
+        print("updateUIView: ScooterMapData contains \(mapData.scooters.count) scooters")
+        
+        // Force update markers when scooter data changes
+        if context.coordinator.lastScooterCount != mapData.scooters.count {
+            context.coordinator.lastScooterCount = mapData.scooters.count
+            context.coordinator.updateMarkers()
+        }
     }
 
-    class Coordinator: NSObject, GMSMapViewDelegate, CLLocationManagerDelegate {
+    class Coordinator: NSObject, GMSMapViewDelegate, CLLocationManagerDelegate, GMUClusterRendererDelegate {
         var parent: GoogleMapView
         var mapView: GMSMapView?
         var locationManager = CLLocationManager()
         var clusterManager: GMUClusterManager?
         var hasCenteredOnce = false
+        var lastScooterCount = 0
 
         init(_ parent: GoogleMapView) {
             self.parent = parent
@@ -61,15 +71,25 @@ struct GoogleMapView: UIViewRepresentable {
             if clusterManager == nil {
                 let iconGen  = GMUDefaultClusterIconGenerator()
                 let algo     = GMUNonHierarchicalDistanceBasedAlgorithm()
+                // Create a default renderer
                 let renderer = GMUDefaultClusterRenderer(
                     mapView: mapView,
                     clusterIconGenerator: iconGen
                 )
+                
+                // Configure the renderer to use custom icons
+                renderer.delegate = self
                 clusterManager = GMUClusterManager(
                     map: mapView,
                     algorithm: algo,
                     renderer: renderer
                 )
+                
+                // Set up delegate for map gestures
+                mapView.delegate = self
+                
+                // Set up tap handlers for the cluster manager
+                clusterManager?.setMapDelegate(self)
             }
             guard mapView.frame.size != .zero else {
                 DispatchQueue.main.async { self.updateMarkers() }
@@ -77,25 +97,34 @@ struct GoogleMapView: UIViewRepresentable {
             }
             clusterManager?.clearItems()
 
-            let region = mapView.projection.visibleRegion()
-            let bounds = GMSCoordinateBounds(
-                coordinate: region.nearLeft,
-                coordinate: region.farRight
-            )
-            let expanded = expand(bounds: bounds, by: 0.01)
-
-            for s in parent.mapData.scooters {
-                if let lat = s.latitude as? CLLocationDegrees,
-                   let lng = s.longitude as? CLLocationDegrees,
-                   expanded.contains(CLLocationCoordinate2D(latitude: lat, longitude: lng))
-                {
-                    let item = POIItem(
-                        position: CLLocationCoordinate2D(latitude: lat, longitude: lng),
-                        name: s.providerName
-                    )
-                    clusterManager?.add(item)
+            print("Rendering \(parent.mapData.scooters.count) scooters")
+            
+            // Debug: Print the first few scooters
+            if !parent.mapData.scooters.isEmpty {
+                for i in 0..<min(3, parent.mapData.scooters.count) {
+                    let s = parent.mapData.scooters[i]
+                    print("Scooter \(i): id=\(s.id), provider=\(s.providerName), lat=\(s.latitude), lng=\(s.longitude)")
                 }
             }
+            
+            // Add ALL scooters to the map without any filtering
+            let totalScooters = parent.mapData.scooters.count
+            
+            for s in parent.mapData.scooters {
+                let lat = s.latitude
+                let lng = s.longitude
+                let position = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+                
+                // Add the marker without any bounds check
+                let item = POIItem(
+                    position: position,
+                    name: s.providerName,
+                    iconUrl: s.providerIcon
+                )
+                clusterManager?.add(item)
+            }
+            
+            print("Added \(totalScooters) markers to the map")
             clusterManager?.cluster()
         }
 
@@ -110,13 +139,129 @@ struct GoogleMapView: UIViewRepresentable {
             )
             return GMSCoordinateBounds(coordinate: sw, coordinate: ne)
         }
+        
+        // MARK: - GMSMapViewDelegate methods for gesture handling
+        
+        func mapView(_ mapView: GMSMapView, didChange position: GMSCameraPosition) {
+            // This is called when the camera position changes during gestures
+            // We can use this to update markers as the map moves
+            // Update markers when camera position changes
+            updateMarkers()
+        }
+        
+        func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+            // Called when the map becomes idle after gestures
+            updateMarkers()
+        }
+        
+        func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
+            // Called when the map is about to move
+            // The gesture parameter is true if the movement is due to a gesture
+            // and false if it's due to programmatic animation
+        }
+        
+        func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+            // Handle marker taps
+            return false // Return true to suppress the default info window
+        }
+        
+        // MARK: - GMUClusterRendererDelegate methods
+        
+        func renderer(_ renderer: GMUClusterRenderer, willRenderMarker marker: GMSMarker) {
+            // Check if this is a marker for a cluster item (not a cluster)
+            if let poiItem = marker.userData as? POIItem {
+                // Set marker properties
+                marker.title = poiItem.name
+                
+                // Set a default icon immediately so marker is visible
+                marker.icon = UIImage(systemName: "mappin.circle.fill")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+                
+                // Load custom icon for the marker directly
+                loadMarkerIcon(for: poiItem.name, url: poiItem.iconUrl) { [weak marker] image in
+                    // Only update if we got a valid image and the marker still exists
+                    if let image = image, let marker = marker {
+                        DispatchQueue.main.async {
+                            marker.icon = image
+                        }
+                    }
+                }
+            }
+        }
+        
+        func renderer(_ renderer: GMUClusterRenderer, markerFor object: Any) -> GMSMarker? {
+            // Return nil to use the default marker created by the renderer
+            return nil
+        }
 
+        // MARK: - Icon loading utilities
+        
+        private var iconCache = [String: UIImage]()
+        private let markerIconSizePx: CGFloat = 48.0
+        
+        private func loadMarkerIcon(for providerName: String, url: String?, completion: @escaping (UIImage?) -> Void) {
+            // Return cached icon if available
+            if let cachedIcon = iconCache[providerName] {
+                completion(cachedIcon)
+                return
+            }
+            
+            // Use default icon if URL is nil
+            guard let iconUrl = url, let url = URL(string: iconUrl) else {
+                let defaultIcon = UIImage(systemName: "mappin.circle.fill")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+                iconCache[providerName] = defaultIcon
+                completion(defaultIcon)
+                return
+            }
+            
+            // Download and cache icon
+            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+                guard let self = self, let data = data, error == nil,
+                      let image = UIImage(data: data) else {
+                    DispatchQueue.main.async {
+                        let defaultIcon = UIImage(systemName: "mappin.circle.fill")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+                        self?.iconCache[providerName] = defaultIcon
+                        completion(defaultIcon)
+                    }
+                    return
+                }
+                
+                // Resize image to appropriate size for marker
+                let resizedImage = self.resizeImage(image: image, targetSize: CGSize(width: self.markerIconSizePx, height: self.markerIconSizePx))
+                
+                // Cache and return the icon
+                DispatchQueue.main.async {
+                    self.iconCache[providerName] = resizedImage
+                    completion(resizedImage)
+                }
+            }.resume()
+        }
+        
+        private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage {
+            let size = image.size
+            let widthRatio = targetSize.width / size.width
+            let heightRatio = targetSize.height / size.height
+            let ratio = min(widthRatio, heightRatio)
+            
+            let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+            let rect = CGRect(origin: .zero, size: newSize)
+            
+            UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
+            image.draw(in: rect)
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            return newImage ?? image
+        }
+        
         class POIItem: NSObject, GMUClusterItem {
             let position: CLLocationCoordinate2D
             let name: String
-            init(position: CLLocationCoordinate2D, name: String) {
+            let iconUrl: String?
+            
+            init(position: CLLocationCoordinate2D, name: String, iconUrl: String? = nil) {
                 self.position = position
                 self.name = name
+                self.iconUrl = iconUrl
             }
         }
     }
