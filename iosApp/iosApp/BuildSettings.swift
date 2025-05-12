@@ -9,10 +9,5 @@
 import Foundation
 
 enum BuildSettings {
-    static var googleMapsApiKey: String {
-        guard let key = Bundle.main.infoDictionary?["GOOGLE_MAPS_API_KEY"] as? String else {
-            fatalError("Missing GOOGLE_MAPS_API_KEY in Info.plist")
-        }
-        return key
-    }
+    // MapKit doesn't require an API key
 }

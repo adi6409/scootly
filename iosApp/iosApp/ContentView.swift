@@ -21,7 +21,9 @@ struct ComposeView: UIViewControllerRepresentable {
                 print("ContentView: Set \(sharedMapData.scooters.count) scooters in ScooterMapData")
             }
             
-            return UIHostingController(rootView: GoogleMapContainerView(mapData: sharedMapData))
+            // Create a UIHostingController with gesture handling configuration
+            let hostingController = UIHostingController(rootView: AppleMapContainerView(mapData: sharedMapData))
+            return hostingController
         }
     }
 

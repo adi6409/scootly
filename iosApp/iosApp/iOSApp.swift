@@ -6,7 +6,7 @@ import ComposeApp
 struct iOSApp: App {
     init() {
         KoinKt.doInitKoin()
-        GMSServices.provideAPIKey(BuildSettings.googleMapsApiKey)
+//        GMSServices.provideAPIKey(BuildSettings.googleMapsApiKey)
     }
     var body: some Scene {
         WindowGroup {
