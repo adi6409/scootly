@@ -7,5 +7,6 @@ import dev.astroianu.scootly.data.Scooter
 @Composable
 expect fun MapComponent(
     providers: List<Provider>,
-    scooters: List<Scooter>
+    scooters: List<Scooter>,
+    onScooterClick: (Scooter?) -> Unit = {}
 )

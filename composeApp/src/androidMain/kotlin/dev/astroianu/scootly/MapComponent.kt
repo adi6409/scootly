@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 @Composable
 actual fun MapComponent(
     providers: List<Provider>,
-    scooters: List<Scooter>
+    scooters: List<Scooter>,
+    onScooterClick: (Scooter?) -> Unit
 ) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -123,6 +124,23 @@ actual fun MapComponent(
                         algorithm = clusterAlgorithm
                         map.setOnCameraIdleListener(this)
                         map.setOnMarkerClickListener(this)
+                        
+                        // Set up the click listener for cluster items
+                        setOnClusterItemClickListener { clusterItem ->
+                            onScooterClick(clusterItem.scooter)
+                            false // Return false to allow the marker to show info window
+                        }
+                        
+                        // Set up the click listener for clusters
+                        setOnClusterClickListener { cluster ->
+                            // If there's only one item in the cluster, select it
+                            if (cluster.size == 1) {
+                                onScooterClick(cluster.items.first().scooter)
+                                false
+                            } else {
+                                true // Return true to allow default behavior for clusters
+                            }
+                        }
                     }
                 }
 

@@ -77,7 +77,12 @@ struct AppleMapView: UIViewRepresentable {
         }
 
         func updateAnnotations() {
-            guard let mapView = mapView else { return }
+            guard let mapView = mapView else { 
+                print("AppleMapView: mapView is nil in updateAnnotations")
+                return 
+            }
+            
+            print("AppleMapView: updateAnnotations called with \(parent.mapData.scooters.count) scooters")
             
             // Remove existing annotations
             let existingAnnotations = mapView.annotations.filter { !($0 is MKUserLocation) }
@@ -93,13 +98,26 @@ struct AppleMapView: UIViewRepresentable {
                 return coordinateIsInRegion(coordinate, region: expandedRegion)
             }
             
-            print("Rendering \(visibleScooters.count) of \(parent.mapData.scooters.count) scooters")
+            print("AppleMapView: Rendering \(visibleScooters.count) of \(parent.mapData.scooters.count) scooters")
             
             // Debug: Print the first few visible scooters
             if !visibleScooters.isEmpty {
                 for i in 0..<min(3, visibleScooters.count) {
                     let s = visibleScooters[i]
-                    print("Visible scooter \(i): id=\(s.id), provider=\(s.providerName), lat=\(s.latitude), lng=\(s.longitude)")
+                    print("AppleMapView: Visible scooter \(i): id=\(s.id), provider=\(s.providerName), lat=\(s.latitude), lng=\(s.longitude)")
+                }
+            } else {
+                print("AppleMapView: No visible scooters to render")
+                
+                // Print all scooters for debugging
+                if !parent.mapData.scooters.isEmpty {
+                    print("AppleMapView: All scooters:")
+                    for i in 0..<min(3, parent.mapData.scooters.count) {
+                        let s = parent.mapData.scooters[i]
+                        print("AppleMapView: Scooter \(i): id=\(s.id), provider=\(s.providerName), lat=\(s.latitude), lng=\(s.longitude)")
+                    }
+                } else {
+                    print("AppleMapView: No scooters available in mapData")
                 }
             }
             
@@ -412,6 +430,47 @@ struct AppleMapView: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             // Update annotations when map region changes
             updateAnnotations()
+        }
+        
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            print("AppleMapView: Annotation selected")
+            
+            // Handle annotation selection
+            if let scooterAnnotation = view.annotation as? ScooterAnnotation {
+                print("AppleMapView: ScooterAnnotation found - \(scooterAnnotation.title ?? "nil")")
+                
+                // Find the corresponding scooter
+                let matchingScooter = parent.mapData.scooters.first { scooter in
+                    let scooterPosition = CLLocationCoordinate2D(latitude: scooter.latitude, longitude: scooter.longitude)
+                    let positionMatches = abs(scooterAnnotation.coordinate.latitude - scooterPosition.latitude) < 0.0001 && 
+                                          abs(scooterAnnotation.coordinate.longitude - scooterPosition.longitude) < 0.0001
+                    let nameMatches = scooterAnnotation.title == scooter.providerName
+                    
+                    if positionMatches && nameMatches {
+                        return true
+                    }
+                    return false
+                }
+                
+                // Call the callback with the selected scooter
+                if let scooter = matchingScooter {
+                    print("AppleMapView: Scooter selected: \(scooter.providerName) (ID: \(scooter.id))")
+                    
+                    // Make sure the callback exists
+                    if parent.mapData.onScooterSelected != nil {
+                        print("AppleMapView: Calling onScooterSelected callback")
+                        parent.mapData.onScooterSelected?(scooter)
+                    } else {
+                        print("AppleMapView: onScooterSelected callback is nil")
+                    }
+                } else {
+                    print("AppleMapView: No matching scooter found")
+                }
+            } else if let clusterAnnotation = view.annotation as? ClusterAnnotation {
+                print("AppleMapView: ClusterAnnotation selected with \(clusterAnnotation.count) scooters")
+            } else {
+                print("AppleMapView: Unknown annotation type selected")
+            }
         }
         
         // MARK: - Icon loading utilities

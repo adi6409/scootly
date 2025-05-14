@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import platform.UIKit.UIViewController
 
 // 1️⃣ The lateinit callback that MapComponent will invoke:
-lateinit var mapViewController: (providers: List<Provider>, scooters: List<Scooter>) -> UIViewController
+lateinit var mapViewController: (providers: List<Provider>, scooters: List<Scooter>, onScooterClick: (Scooter?) -> Unit) -> UIViewController
 
 // Track the last created view controller to avoid recreating it on every recomposition
 private var lastViewController: UIViewController? = null
@@ -30,7 +30,7 @@ private var lastScootersHash: Int = 0
  * `mapViewController` is wired up before any Composable tries to use it.
  */
 fun MainViewController(
-    mapUIViewController: (providers: List<Provider>, scooters: List<Scooter>) -> UIViewController
+    mapUIViewController: (providers: List<Provider>, scooters: List<Scooter>, onScooterClick: (Scooter?) -> Unit) -> UIViewController
 ): UIViewController =
     ComposeUIViewController {
         // assign the Swift closure into our lateinit var
@@ -43,7 +43,8 @@ fun MainViewController(
 @Composable
 actual fun MapComponent(
     providers: List<Provider>,
-    scooters: List<Scooter>
+    scooters: List<Scooter>,
+    onScooterClick: (Scooter?) -> Unit
 ) {
     // Calculate hashes to detect changes
     val providersHash = providers.hashCode()
@@ -54,7 +55,7 @@ actual fun MapComponent(
                             providersHash != lastProvidersHash || 
                             scootersHash != lastScootersHash) {
         // Create a new view controller with updated data
-        val newController = mapViewController(providers, scooters)
+        val newController = mapViewController(providers, scooters, onScooterClick)
         lastViewController = newController
         lastProvidersHash = providersHash
         lastScootersHash = scootersHash

@@ -161,8 +161,44 @@ struct GoogleMapView: UIViewRepresentable {
         }
         
         func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+            print("GoogleMapView: Marker tapped")
+            
             // Handle marker taps
-            return false // Return true to suppress the default info window
+            if let poiItem = marker.userData as? POIItem {
+                print("GoogleMapView: POIItem found - \(poiItem.name)")
+                
+                // Find the corresponding scooter
+                let matchingScooter = parent.mapData.scooters.first { scooter in
+                    let scooterPosition = CLLocationCoordinate2D(latitude: scooter.latitude, longitude: scooter.longitude)
+                    let positionMatches = abs(poiItem.position.latitude - scooterPosition.latitude) < 0.0001 && 
+                                          abs(poiItem.position.longitude - scooterPosition.longitude) < 0.0001
+                    let nameMatches = poiItem.name == scooter.providerName
+                    
+                    if positionMatches && nameMatches {
+                        return true
+                    }
+                    return false
+                }
+                
+                // Call the callback with the selected scooter
+                if let scooter = matchingScooter {
+                    print("GoogleMapView: Scooter selected: \(scooter.providerName) (ID: \(scooter.id))")
+                    
+                    // Make sure the callback exists
+                    if parent.mapData.onScooterSelected != nil {
+                        print("GoogleMapView: Calling onScooterSelected callback")
+                        parent.mapData.onScooterSelected?(scooter)
+                    } else {
+                        print("GoogleMapView: onScooterSelected callback is nil")
+                    }
+                } else {
+                    print("GoogleMapView: No matching scooter found")
+                }
+            } else {
+                print("GoogleMapView: Marker userData is not a POIItem")
+            }
+            
+            return false // Return false to allow the default info window
         }
         
         // MARK: - GMUClusterRendererDelegate methods

@@ -25,4 +25,7 @@ class ScooterMapData: ObservableObject {
             }
         }
     }
+    
+    // Callback for when a scooter is selected
+    var onScooterSelected: ((Scooter?) -> Void)?
 }

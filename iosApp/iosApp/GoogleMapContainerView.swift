@@ -1,4 +1,5 @@
 import SwiftUI
+import ComposeApp
 
 /// Thin wrapper to embed the actual map view
 struct GoogleMapContainerView: View {
