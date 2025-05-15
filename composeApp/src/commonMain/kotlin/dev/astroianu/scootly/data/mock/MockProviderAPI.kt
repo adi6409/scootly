@@ -60,7 +60,10 @@ class MockProviderAPI: ProviderAPI {
     )
 
     private val cities = listOf(
-        "Tel Aviv"
+        "Tel Aviv",
+        "Berlin",
+        "Paris",
+        "London"
     )
 
     override suspend fun getCities(): List<String> = cities

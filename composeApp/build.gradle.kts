@@ -54,6 +54,9 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
             implementation(libs.napier)
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.multiplatform.settings.coroutines)
         }
         androidMain.dependencies {
             implementation(compose.preview)
@@ -115,4 +118,3 @@ android {
 dependencies {
     debugImplementation(compose.uiTooling)
 }
-
