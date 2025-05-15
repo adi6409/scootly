@@ -59,8 +59,13 @@ class MockProviderAPI: ProviderAPI {
         )
     )
 
+    private val cities = listOf(
+        "Tel Aviv"
+    )
 
-    override suspend fun getProviders(): List<Provider> = providers
+    override suspend fun getCities(): List<String> = cities
+
+    override suspend fun getProviders(city: String): List<Provider> = providers
     override suspend fun getProvider(id: String): Provider? {
         return providers.find { it.id == id }
     }

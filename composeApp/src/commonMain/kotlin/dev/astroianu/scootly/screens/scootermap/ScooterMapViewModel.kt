@@ -28,7 +28,7 @@ class ScooterMapViewModel(
     init {
         // initial load
         coroutineScope.launch {
-            val providers = providerRepository.getProviders()
+            val providers = providerRepository.getProviders("Tel Aviv")
             _allProviders.value = providers
             Napier.d("Fetched ${providers.size} providers")
             

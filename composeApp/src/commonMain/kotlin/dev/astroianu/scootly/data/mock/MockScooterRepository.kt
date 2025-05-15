@@ -21,7 +21,7 @@ class MockScooterRepository(
 
     fun initialize() {
         scope.launch {
-            providers = providerRepository.getProviders()
+            providers = providerRepository.getProviders("Tel Aviv")
             Napier.d("Fetched ${providers?.size} providers")
         }
     }

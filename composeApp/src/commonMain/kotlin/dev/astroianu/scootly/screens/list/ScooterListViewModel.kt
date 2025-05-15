@@ -31,7 +31,7 @@ class ScooterListViewModel(
 
     init {
         coroutineScope.launch {
-            val providerList = providerRepository.getProviders()
+            val providerList = providerRepository.getProviders("Tel Aviv")
             _providers.value = providerList
             if (providerList.isNotEmpty()) {
                 selectProvider(providerList.first().id)

@@ -10,7 +10,9 @@ class MockProviderRepository(
     private val providerAPI: ProviderAPI
 ) : ProviderRepository {
 
-    override suspend fun getProviders(): List<Provider> = providerAPI.getProviders()
+    override suspend fun getCities(): List<String> = providerAPI.getCities()
+
+    override suspend fun getProviders(city: String): List<Provider> = providerAPI.getProviders(city)
 
     override suspend fun getProviderById(id: String): Provider? {
         return providerAPI.getProvider(id)
