@@ -23,12 +23,12 @@ struct ComposeView: UIViewControllerRepresentable {
                     print("Scooter Selected in ContentView: \(scooter?.providerName ?? "nil") (ID: \(scooter?.id ?? "nil"))")
                     
                     // Ensure we're on the main thread when calling back to Kotlin
-                    DispatchQueue.main.async {
+                    // Use a slight delay to ensure UI events are processed first
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        print("ContentView: Executing Kotlin callback for scooter selection")
                         _ = onScooterClick(scooter)
+                        print("ContentView: Kotlin callback executed")
                     }
-                    
-                    // Also print to verify the callback is being called
-                    print("onScooterSelected callback executed")
                 }
                 print("ContentView: Set \(sharedMapData.scooters.count) scooters in ScooterMapData")
             }

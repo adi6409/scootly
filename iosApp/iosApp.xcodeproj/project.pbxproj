@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
+		0A1234572DD47895006E56BC /* ScooterAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1234562DD47890006E56BC /* ScooterAnnotationView.swift */; };
 		0A25F44F2DD2A1E0006E56BC /* AppleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A25F44D2DD2A1C0006E56BC /* AppleMapView.swift */; };
 		0A25F4502DD2A1E5006E56BC /* AppleMapContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A25F44E2DD2A1D0006E56BC /* AppleMapContainerView.swift */; };
 		0A25F44A2DCFC90A006E56BC /* GoogleMapsUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 0A25F4492DCFC90A006E56BC /* GoogleMapsUtils */; };
@@ -26,6 +27,7 @@
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		0A1234562DD47890006E56BC /* ScooterAnnotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScooterAnnotationView.swift; sourceTree = "<group>"; };
 		0A25F44D2DD2A1C0006E56BC /* AppleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleMapView.swift; sourceTree = "<group>"; };
 		0A25F44E2DD2A1D0006E56BC /* AppleMapContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleMapContainerView.swift; sourceTree = "<group>"; };
 		0A25F44B2DCFE88C006E56BC /* GoogleMapContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapContainerView.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				0AAB87482DCFC3FF00C6CC01 /* ScooterMapData.swift */,
 				0AAB87462DCF996100C6CC01 /* GoogleMapView.swift */,
 				0A25F44D2DD2A1C0006E56BC /* AppleMapView.swift */,
+				0A1234562DD47890006E56BC /* ScooterAnnotationView.swift */,
 				0AAB87442DCF976D00C6CC01 /* BuildSettings.swift */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ContentView.swift */,
@@ -227,6 +230,7 @@
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				0AAB87452DCF976D00C6CC01 /* BuildSettings.swift in Sources */,
 				0AA4CCA82DD1736300911E84 /* ScooterClusterRenderer.swift in Sources */,
+				0A1234572DD47895006E56BC /* ScooterAnnotationView.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

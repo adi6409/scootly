@@ -6,7 +6,7 @@ import UIKit
 struct AppleMapView: UIViewRepresentable {
     @ObservedObject var mapData: ScooterMapData
 
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    func makeCoordinator() -> Coordinator { Coordinator(self, mapData: mapData) }
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -53,14 +53,17 @@ struct AppleMapView: UIViewRepresentable {
 
     class Coordinator: NSObject, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate {
         var parent: AppleMapView
+        var mapData: ScooterMapData
         var mapView: MKMapView?
         var locationManager = CLLocationManager()
         var hasCenteredOnce = false
         var lastScooterCount = 0
         
-        init(_ parent: AppleMapView) {
+        init(_ parent: AppleMapView, mapData: ScooterMapData) {
             self.parent = parent
+            self.mapData = mapData
             super.init()
+            print("AppleMapView.Coordinator: Initialized with \(mapData.scooters.count) scooters")
         }
 
         func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -399,17 +402,29 @@ struct AppleMapView: UIViewRepresentable {
             // Handle scooter annotations
             if let scooterAnnotation = annotation as? ScooterAnnotation {
                 let identifier = "scooter"
-                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? ScooterAnnotationView
                 
                 if annotationView == nil {
-                    annotationView = MKAnnotationView(annotation: scooterAnnotation, reuseIdentifier: identifier)
+                    // Create our custom annotation view
+                    annotationView = ScooterAnnotationView(annotation: scooterAnnotation, reuseIdentifier: identifier, coordinator: self)
                     annotationView?.canShowCallout = true
+                    
+                    // Make sure user interaction is enabled
+                    annotationView?.isUserInteractionEnabled = true
+                    
+                    print("AppleMapView: Created NEW ScooterAnnotationView with userInteractionEnabled: \(annotationView?.isUserInteractionEnabled ?? false)")
+                } else {
+                    // Update the annotation
+                    annotationView?.annotation = scooterAnnotation
+                    print("AppleMapView: Reused ScooterAnnotationView with userInteractionEnabled: \(annotationView?.isUserInteractionEnabled ?? false)")
                 }
                 
-                annotationView?.annotation = scooterAnnotation
-                
                 // Set a default icon immediately so annotation is visible
-                annotationView?.image = UIImage(systemName: "mappin.circle.fill")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+                let defaultImage = UIImage(systemName: "mappin.circle.fill")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+                annotationView?.image = defaultImage
+                
+                // Make sure the image is centered
+                annotationView?.centerOffset = CGPoint.zero
                 
                 // Load custom icon for the annotation
                 loadAnnotationIcon(for: scooterAnnotation.title ?? "", url: scooterAnnotation.iconUrl) { [weak annotationView] image in
@@ -432,12 +447,56 @@ struct AppleMapView: UIViewRepresentable {
             updateAnnotations()
         }
         
+        // Handle tap gesture on annotation view
+        @objc func handleAnnotationTap(_ gesture: UITapGestureRecognizer) {
+            print("AppleMapView: Direct tap on annotation detected")
+            
+            guard let annotationView = gesture.view as? MKAnnotationView,
+                  let annotation = annotationView.annotation else {
+                print("AppleMapView: Could not get annotation from tap gesture")
+                return
+            }
+            
+            // Manually trigger the selection
+            mapView?.selectAnnotation(annotation, animated: true)
+            
+            // Handle the tap directly
+            if let scooterAnnotation = annotation as? ScooterAnnotation {
+                print("AppleMapView: Direct tap on ScooterAnnotation - \(scooterAnnotation.title ?? "nil")")
+                
+                // Find the corresponding scooter
+                let matchingScooter = parent.mapData.scooters.first { scooter in
+                    let scooterPosition = CLLocationCoordinate2D(latitude: scooter.latitude, longitude: scooter.longitude)
+                    let positionMatches = abs(scooterAnnotation.coordinate.latitude - scooterPosition.latitude) < 0.0001 && 
+                                          abs(scooterAnnotation.coordinate.longitude - scooterPosition.longitude) < 0.0001
+                    let nameMatches = scooterAnnotation.title == scooter.providerName
+                    
+                    return positionMatches && nameMatches
+                }
+                
+                // Call the callback with the selected scooter
+                if let scooter = matchingScooter {
+                    print("AppleMapView: Direct tap - Scooter selected: \(scooter.providerName) (ID: \(scooter.id))")
+                    
+                    // Make sure the callback exists
+                    if parent.mapData.onScooterSelected != nil {
+                        print("AppleMapView: Direct tap - Calling onScooterSelected callback")
+                        parent.mapData.onScooterSelected?(scooter)
+                    } else {
+                        print("AppleMapView: Direct tap - onScooterSelected callback is nil")
+                    }
+                } else {
+                    print("AppleMapView: Direct tap - No matching scooter found")
+                }
+            }
+        }
+        
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-            print("AppleMapView: Annotation selected")
+            print("AppleMapView: Annotation selected via mapView delegate - view type: \(type(of: view))")
             
             // Handle annotation selection
             if let scooterAnnotation = view.annotation as? ScooterAnnotation {
-                print("AppleMapView: ScooterAnnotation found - \(scooterAnnotation.title ?? "nil")")
+                print("AppleMapView: ScooterAnnotation found - \(scooterAnnotation.title ?? "nil") at \(scooterAnnotation.coordinate.latitude), \(scooterAnnotation.coordinate.longitude)")
                 
                 // Find the corresponding scooter
                 let matchingScooter = parent.mapData.scooters.first { scooter in

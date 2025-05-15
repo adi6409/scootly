@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,13 +92,34 @@ fun ScooterMapScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .height(300.dp)
                         .padding(16.dp)
                         .background(MaterialTheme.colors.surface)
                         .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.2f))
                 ) {
                     // This is an empty rectangle overlay as requested
                     // You can add content here later if needed
+                    Text(
+                        text = "Selected scooter: ${selectedScooter?.providerName} (ID: ${selectedScooter?.id})",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                    )
+                    // Close button
+                    IconButton(
+                        onClick = {
+                            viewModel.selectScooter(null)
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = MaterialTheme.colors.onSurface
+                        )
+                    }
                 }
             }
         }
