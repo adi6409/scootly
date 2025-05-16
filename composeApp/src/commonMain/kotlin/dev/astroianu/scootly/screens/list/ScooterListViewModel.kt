@@ -7,6 +7,7 @@ import dev.astroianu.scootly.data.Scooter
 import dev.astroianu.scootly.data.ScooterRepository
 import dev.astroianu.scootly.data.mock.MockProviderRepository
 import dev.astroianu.scootly.data.mock.MockScooterRepository
+import dev.astroianu.scootly.storage.SettingsStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 class ScooterListViewModel(
     private val providerRepository: ProviderRepository,
     private val scooterRepository: ScooterRepository,
+    private val settingsStorage: SettingsStorage,
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 ): ViewModel() {
     private val _providers = MutableStateFlow<List<Provider>>(emptyList())
@@ -31,7 +33,7 @@ class ScooterListViewModel(
 
     init {
         coroutineScope.launch {
-            val providerList = providerRepository.getProviders("Tel Aviv")
+            val providerList = providerRepository.getProviders(settingsStorage.getSelectedCity())
             _providers.value = providerList
             if (providerList.isNotEmpty()) {
                 selectProvider(providerList.first().id)

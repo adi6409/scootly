@@ -33,7 +33,7 @@ class OnboardingViewModel(
         coroutineScope.launch {
             try {
                 val availableCities = providerRepository.getCities()
-                _cities.value = availableCities
+                _cities.value = availableCities.sorted()
                 Napier.d("Loaded ${availableCities.size} cities for onboarding")
                 
                 // If there's only one city, select it automatically

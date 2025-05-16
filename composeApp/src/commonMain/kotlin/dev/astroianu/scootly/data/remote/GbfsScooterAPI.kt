@@ -37,26 +37,31 @@ class GbfsScooterAPI(
     )
 
     override suspend fun getScooters(provider: Provider): List<Scooter> {
-        val endpoint = if (provider.addJson) {
-            "${provider.gbfsEndpoint}/free_bike_status.json"
-        } else {
-            "${provider.gbfsEndpoint}/free_bike_status"
-        }
+        try {
+            val endpoint = if (provider.addJson) {
+                "${provider.gbfsEndpoint}/free_bike_status.json"
+            } else {
+                "${provider.gbfsEndpoint}/free_bike_status"
+            }
 
-        val response: FreeBikeStatusResponse = ktorClient.get(endpoint).body()
-        return response.data.bikes.map { bike ->
-            Scooter(
-                id = bike.bikeId,
-                providerId = provider.id,
-                providerName = provider.name,
-                providerIcon = provider.icon, // No icon in Provider, set as empty or provide logic if available
-                latitude = bike.lat,
-                longitude = bike.lon,
-                range = bike.range ?: 0.0,
-                reserved = bike.isReserved,
-                disabled = bike.isDisabled,
-                lastUpdated = bike.lastReported ?: response.lastUpdated
-            )
+            val response: FreeBikeStatusResponse = ktorClient.get(endpoint).body()
+            return response.data.bikes.map { bike ->
+                Scooter(
+                    id = bike.bikeId,
+                    providerId = provider.id,
+                    providerName = provider.name,
+                    providerIcon = provider.icon, // No icon in Provider, set as empty or provide logic if available
+                    latitude = bike.lat,
+                    longitude = bike.lon,
+                    range = bike.range ?: 0.0,
+                    reserved = bike.isReserved,
+                    disabled = bike.isDisabled,
+                    lastUpdated = bike.lastReported ?: response.lastUpdated
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return emptyList() // Handle error case
         }
     }
 

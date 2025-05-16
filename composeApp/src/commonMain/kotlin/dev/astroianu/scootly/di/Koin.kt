@@ -9,6 +9,7 @@ import dev.astroianu.scootly.data.mock.MockProviderRepository
 import dev.astroianu.scootly.data.mock.MockScooterAPI
 import dev.astroianu.scootly.data.mock.MockScooterRepository
 import dev.astroianu.scootly.data.remote.GbfsScooterAPI
+import dev.astroianu.scootly.data.remote.RemoteProviderAPI
 import dev.astroianu.scootly.screens.list.ScooterListViewModel
 import dev.astroianu.scootly.screens.onboarding.OnboardingViewModel
 import dev.astroianu.scootly.screens.scootermap.ScooterMapViewModel
@@ -39,19 +40,20 @@ val dataModule = module {
         }
     }
 
-    single<ProviderAPI> { MockProviderAPI() }
+//    single<ProviderAPI> { MockProviderAPI() }
+    single<ProviderAPI> { RemoteProviderAPI(get()) }
     single<ProviderRepository> { MockProviderRepository(get()) }
 
 //    single<ScooterAPI> { MockScooterAPI() }
     single<ScooterAPI> { GbfsScooterAPI(get()) }
-    single<ScooterRepository> { MockScooterRepository(get(), get()).apply{ initialize() } }
+    single<ScooterRepository> { MockScooterRepository(get(), get(), get()).apply{ initialize() } }
     
     // Settings storage
     single<SettingsStorage> { createSettingsStorage() }
 }
 
 val viewModelModule = module {
-    viewModel { ScooterListViewModel(get(), get()) }
+    viewModel { ScooterListViewModel(get(), get(), get()) }
     viewModel { ScooterMapViewModel(get(), get(), get()) }
     viewModel { SettingsViewModel(get(), get()) }
     viewModel { OnboardingViewModel(get(), get()) }

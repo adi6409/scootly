@@ -1,10 +1,12 @@
 package dev.astroianu.scootly.data.mock
 
+import com.russhwolf.settings.Settings
 import dev.astroianu.scootly.data.Provider
 import dev.astroianu.scootly.data.ProviderRepository
 import dev.astroianu.scootly.data.Scooter
 import dev.astroianu.scootly.data.ScooterAPI
 import dev.astroianu.scootly.data.ScooterRepository
+import dev.astroianu.scootly.storage.SettingsStorage
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -12,6 +14,7 @@ import kotlinx.coroutines.launch
 
 class MockScooterRepository(
     private val providerRepository: ProviderRepository,
+    private val settingsStorage: SettingsStorage,
     private val scooterAPI: ScooterAPI
 ) : ScooterRepository {
 
@@ -21,7 +24,7 @@ class MockScooterRepository(
 
     fun initialize() {
         scope.launch {
-            providers = providerRepository.getProviders("Tel Aviv")
+            providers = providerRepository.getProviders(settingsStorage.getSelectedCity())
             Napier.d("Fetched ${providers?.size} providers")
         }
     }

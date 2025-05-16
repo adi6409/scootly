@@ -31,7 +31,7 @@ class SettingsViewModel(
         coroutineScope.launch {
             try {
                 val availableCities = providerRepository.getCities()
-                _cities.value = availableCities
+                _cities.value = availableCities.sorted()
                 Napier.d("Loaded ${availableCities.size} cities")
                 
                 // Get selected city from storage
