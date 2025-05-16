@@ -19,7 +19,7 @@ import org.koin.core.component.inject
 
 @Composable
 fun OnboardingScreen(
-    onComplete: () -> Unit = {}
+    onComplete: () -> Unit
 ) {
     // Inject dependencies
     val viewModel: OnboardingViewModel = remember { object : KoinComponent {

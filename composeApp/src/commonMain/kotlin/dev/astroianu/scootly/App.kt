@@ -1,6 +1,7 @@
 package dev.astroianu.scootly
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.navigator.CurrentScreen
 import dev.astroianu.scootly.navigation.Screen
 import dev.astroianu.scootly.screens.onboarding.OnboardingScreen
 import dev.astroianu.scootly.screens.scootermap.ScooterMapScreen
@@ -18,6 +20,22 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.tab.CurrentTab
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabNavigator
+import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
+import dev.astroianu.scootly.navigation.OnboardingVoyagerScreen
+import dev.astroianu.scootly.navigation.MapTab
+import dev.astroianu.scootly.navigation.SettingsTab
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @Composable
 @Preview
@@ -27,10 +45,7 @@ fun App() {
         val storage: SettingsStorage by inject()
     }.storage }
     
-    // State
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Map) }
     var showOnboarding by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
     
     // Check if onboarding is completed
     LaunchedEffect(Unit) {
@@ -38,51 +53,46 @@ fun App() {
     }
     
     MaterialTheme {
-        if (showOnboarding) {
-            // Show onboarding screen
-            OnboardingScreen(
-                onComplete = {
-                    showOnboarding = false
-                    currentScreen = Screen.Map
-                }
-            )
-        } else {
-            // Main app with bottom navigation
-            Scaffold(
-                bottomBar = {
-                    BottomNavigation {
-                        BottomNavigationItem(
-                            icon = { Icon(Icons.Default.Home, contentDescription = "Map") },
-                            label = { Text("Map") },
-                            selected = currentScreen == Screen.Map,
-                            onClick = { currentScreen = Screen.Map }
-                        )
-                        
-                        BottomNavigationItem(
-                            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                            label = { Text("Settings") },
-                            selected = currentScreen == Screen.Settings,
-                            onClick = { currentScreen = Screen.Settings }
-                        )
-                    }
-                }
-            ) { paddingValues ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    when (currentScreen) {
-                        Screen.Map -> ScooterMapScreen()
-                        Screen.Settings -> SettingsScreen(
-                            onNavigateBack = {
-                                currentScreen = Screen.Map
+        Navigator(OnboardingVoyagerScreen) { navigator ->
+            if (showOnboarding) {
+                CurrentScreen()
+            } else {
+                TabNavigator(MapTab) {
+                    Scaffold(
+                        bottomBar = {
+                            BottomNavigation {
+                                TabNavigationItem(MapTab)
+                                TabNavigationItem(SettingsTab)
                             }
-                        )
-                        else -> ScooterMapScreen() // Fallback
+                        }
+                    ) { paddingValues ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                        ) {
+                            CurrentTab()
+                        }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun RowScope.TabNavigationItem(tab: Tab) {
+    val tabNavigator = LocalTabNavigator.current
+    val isSelected = tabNavigator.current == tab
+    BottomNavigationItem(
+        selected = isSelected,
+        onClick = { tabNavigator.current = tab },
+        icon = {
+            Icon(
+                painter = tab.options.icon ?: rememberVectorPainter(Icons.Default.Home),
+                contentDescription = tab.options.title
+            )
+        },
+        label = { Text(tab.options.title) }
+    )
 }

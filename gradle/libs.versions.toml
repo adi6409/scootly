@@ -28,6 +28,9 @@ multiplatformSettingsCoroutines = "1.1.1"
 napier = "2.7.1"
 playServicesLocation = "21.3.0"
 secretsGradlePlugin = "2.0.1"
+voyagerBottomSheetNavigator = "1.1.0-beta03"
+voyagerNavigator = "1.1.0-beta03"
+voyagerTabNavigator = "1.1.0-beta03"
 
 [libraries]
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
@@ -68,6 +71,9 @@ multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-sett
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
+voyager-bottom-sheet-navigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyagerBottomSheetNavigator" }
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerNavigator" }
+voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyagerTabNavigator" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
