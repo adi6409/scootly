@@ -11,12 +11,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
 import dev.astroianu.scootly.data.ProviderRepository
 import dev.astroianu.scootly.storage.SettingsStorage
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import com.mohamedrejeb.calf.permissions.rememberPermissionState
+import com.mohamedrejeb.calf.permissions.Permission
+import com.mohamedrejeb.calf.permissions.Permission.FineLocation
+import com.mohamedrejeb.calf.permissions.PermissionStatus
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun OnboardingScreen(
     onComplete: () -> Unit
@@ -29,13 +35,12 @@ fun OnboardingScreen(
     // Collect state
     val cities by viewModel.cities.collectAsState()
     val selectedCity by viewModel.selectedCity.collectAsState()
-    val isLocationPermissionGranted by viewModel.isLocationPermissionGranted.collectAsState()
+//    val isLocationPermissionGranted by viewModel.isLocationPermissionGranted.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    
     // Local UI state
     var expanded by remember { mutableStateOf(false) }
     var currentStep by remember { mutableStateOf(0) }
-    
+    val permissionState = rememberPermissionState(permission = Permission.FineLocation)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,20 +81,36 @@ fun OnboardingScreen(
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
-                
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            viewModel.requestLocationPermission()
+                if (permissionState.status == PermissionStatus.Granted) {
+                    Text(
+                        text = "Location permission granted",
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.primary
+                    )
+                    Button(
+                        onClick = {
                             currentStep = 1
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(0.8f)
-                ) {
-                    Text("Grant Location Permission")
+                        },
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    ) {
+                        Text("Continue")
+                    }
+                } else {
+                    Text(
+                        text = "Location permission not granted",
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.error
+                    )
+                    Button(
+                        onClick = {
+                            permissionState.launchPermissionRequest()
+                        },
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    ) {
+                        Text("Grant Location Permission")
+                    }
                 }
             }
-            
             1 -> {
                 // City selection step
                 Text(
@@ -97,7 +118,7 @@ fun OnboardingScreen(
                     style = MaterialTheme.typography.h6,
                     textAlign = TextAlign.Center
                 )
-                
+
                 // City dropdown
                 Box(modifier = Modifier.fillMaxWidth(0.8f)) {
                     Text(

@@ -60,6 +60,10 @@ kotlin {
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.tab.navigator)
             implementation(libs.voyager.bottom.sheet.navigator)
+//            implementation(libs.permissions)
+//            implementation(libs.permissions.compose) // permissions api + compose extensions
+//            implementation(libs.permissions.location)
+            implementation(libs.calf.permissions)
         }
         androidMain.dependencies {
             implementation(compose.preview)

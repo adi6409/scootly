@@ -1,6 +1,7 @@
 package dev.astroianu.scootly.screens.onboarding
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.astroianu.scootly.data.ProviderRepository
 import dev.astroianu.scootly.storage.SettingsStorage
 import io.github.aakira.napier.Napier
@@ -26,8 +27,7 @@ class OnboardingViewModel(
     // Exposed state
     val cities: StateFlow<List<String>> = _cities.asStateFlow()
     val selectedCity: StateFlow<String> = _selectedCity.asStateFlow()
-    val isLocationPermissionGranted: StateFlow<Boolean> = _isLocationPermissionGranted.asStateFlow()
-    
+
     init {
         // Load cities
         coroutineScope.launch {
@@ -44,17 +44,6 @@ class OnboardingViewModel(
                 Napier.e("Error loading cities for onboarding", e)
             }
         }
-    }
-    
-    /**
-     * Request location permission
-     * In a real app, this would trigger platform-specific permission requests
-     */
-    suspend fun requestLocationPermission() {
-        // In a real app, this would be platform-specific code to request permissions
-        // For now, we'll just simulate it being granted
-        _isLocationPermissionGranted.value = true
-        Napier.d("Location permission granted")
     }
     
     /**
