@@ -1,5 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -13,7 +11,6 @@ plugins {
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -27,8 +24,6 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-//            export("dev.icerock.moko:maps:0.6.0")
-//            export("dev.icerock.moko:maps-google:0.6.0")
         }
     }
     
@@ -60,9 +55,6 @@ kotlin {
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.tab.navigator)
             implementation(libs.voyager.bottom.sheet.navigator)
-//            implementation(libs.permissions)
-//            implementation(libs.permissions.compose) // permissions api + compose extensions
-//            implementation(libs.permissions.location)
             implementation(libs.calf.permissions)
         }
         androidMain.dependencies {
@@ -104,7 +96,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1"
     }
     packaging {
         resources {
