@@ -19,8 +19,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import com.mohamedrejeb.calf.permissions.rememberPermissionState
 import com.mohamedrejeb.calf.permissions.Permission
-import com.mohamedrejeb.calf.permissions.Permission.FineLocation
 import com.mohamedrejeb.calf.permissions.PermissionStatus
+import io.github.aakira.napier.Napier
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -40,7 +40,13 @@ fun OnboardingScreen(
     // Local UI state
     var expanded by remember { mutableStateOf(false) }
     var currentStep by remember { mutableStateOf(0) }
-    val permissionState = rememberPermissionState(permission = Permission.FineLocation)
+    val permissionState = rememberPermissionState(permission = Permission.CoarseLocation)
+    
+    // Add debug logging for permission state changes
+    LaunchedEffect(permissionState.status) {
+        Napier.d("Location permission status changed to: ${permissionState.status}")
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,6 +110,7 @@ fun OnboardingScreen(
                     Button(
                         onClick = {
                             permissionState.launchPermissionRequest()
+                            Napier.d("Requesting location permission")
                         },
                         modifier = Modifier.fillMaxWidth(0.8f)
                     ) {

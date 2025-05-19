@@ -32,7 +32,8 @@ secretsGradlePlugin = "2.0.1"
 voyagerBottomSheetNavigator = "1.1.0-beta03"
 voyagerNavigator = "1.1.0-beta03"
 voyagerTabNavigator = "1.1.0-beta03"
-calf-permissions = "0.7.1"
+calf = "0.7.1"
+compose-cupertino = "0.1.0-alpha04"
 
 [libraries]
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
@@ -79,7 +80,11 @@ secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.se
 voyager-bottom-sheet-navigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyagerBottomSheetNavigator" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerNavigator" }
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyagerTabNavigator" }
-calf-permissions = { module = "com.mohamedrejeb.calf:calf-permissions", version.ref = "calf-permissions" }
+calf-permissions = { module = "com.mohamedrejeb.calf:calf-permissions", version.ref = "calf" }
+calf-ui = { module = "com.mohamedrejeb.calf:calf-ui", version.ref = "calf" }
+compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-adaptive", version.ref = "compose-cupertino" }
+compose-cupertino-icons = { module = "io.github.alexzhirkevich:cupertino-icons-extended", version.ref = "compose-cupertino" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

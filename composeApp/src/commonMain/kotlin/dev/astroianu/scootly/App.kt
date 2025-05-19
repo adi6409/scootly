@@ -1,10 +1,12 @@
 package dev.astroianu.scootly
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -36,7 +38,16 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBar
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBarItem
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
+import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
+import io.github.alexzhirkevich.cupertino.adaptive.Theme
+import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.darkColorScheme
+import io.github.alexzhirkevich.cupertino.theme.lightColorScheme
 
+@OptIn(ExperimentalAdaptiveApi::class)
 @Composable
 @Preview
 fun App() {
@@ -44,15 +55,15 @@ fun App() {
     val settingsStorage = remember { object : KoinComponent {
         val storage: SettingsStorage by inject()
     }.storage }
-    
+
     var showOnboarding by remember { mutableStateOf(true) }
-    
+
     // Check if onboarding is completed
     LaunchedEffect(Unit) {
         showOnboarding = !settingsStorage.isOnboardingCompleted()
     }
-    
-    MaterialTheme {
+
+    AppTheme {
         Navigator(OnboardingVoyagerScreen) { navigator ->
             if (showOnboarding) {
                 CurrentScreen()
@@ -60,7 +71,7 @@ fun App() {
                 TabNavigator(MapTab) {
                     Scaffold(
                         bottomBar = {
-                            BottomNavigation {
+                            AdaptiveNavigationBar {
                                 TabNavigationItem(MapTab)
                                 TabNavigationItem(SettingsTab)
                             }
@@ -80,17 +91,53 @@ fun App() {
     }
 }
 
+
+@OptIn(ExperimentalAdaptiveApi::class)
+@Composable
+fun AppTheme(
+//    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useDarkTheme: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    AdaptiveTheme(
+        material = {
+            MaterialTheme(
+                colorScheme = if (useDarkTheme) {
+                    androidx.compose.material3.darkColorScheme()
+                } else {
+                    androidx.compose.material3.lightColorScheme()
+                },
+                content = it
+            )
+        },
+        cupertino = {
+            CupertinoTheme(
+                colorScheme = if (useDarkTheme) {
+                    darkColorScheme()
+                } else {
+                    lightColorScheme()
+                },
+                content = it
+            )
+
+        },
+        content = content
+    )
+}
+
 @Composable
 fun RowScope.TabNavigationItem(tab: Tab) {
     val tabNavigator = LocalTabNavigator.current
     val isSelected = tabNavigator.current == tab
-    BottomNavigationItem(
+    AdaptiveNavigationBarItem(
         selected = isSelected,
         onClick = { tabNavigator.current = tab },
         icon = {
             Icon(
-                painter = tab.options.icon ?: rememberVectorPainter(Icons.Default.Home),
-                contentDescription = tab.options.title
+                painter = tab.options.icon ?:
+                    rememberVectorPainter(Icons.Default.Home),
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
         },
         label = { Text(tab.options.title) }

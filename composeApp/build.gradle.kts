@@ -56,6 +56,9 @@ kotlin {
             implementation(libs.voyager.tab.navigator)
             implementation(libs.voyager.bottom.sheet.navigator)
             implementation(libs.calf.permissions)
+            implementation(libs.calf.ui)
+            implementation(libs.compose.cupertino)
+            implementation(libs.compose.cupertino.icons)
         }
         androidMain.dependencies {
             implementation(compose.preview)
