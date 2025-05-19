@@ -17,16 +17,6 @@ struct AppleMapContainerView: View {
                 .onAppear {
                     print("AppleMapContainerView: onAppear with \(mapData.scooters.count) scooters")
                 }
-                // Add a transparent overlay to handle gesture conflicts
-                .overlay(
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in }
-                                .onEnded { _ in }
-                        )
-                )
         }
     }
 }

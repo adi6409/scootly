@@ -17,17 +17,6 @@ struct AppleMapView: UIViewRepresentable {
         mapView.isPitchEnabled = true
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
-        mapView.showsCallout = false
-        
-        // Add gesture recognizers with proper delegate handling
-        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
-        panGesture.delegate = context.coordinator
-        mapView.addGestureRecognizer(panGesture)
-        
-        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePinchGesture(_:)))
-        pinchGesture.delegate = context.coordinator
-        mapView.addGestureRecognizer(pinchGesture)
-        
         // Location updates
         context.coordinator.mapView = mapView
         context.coordinator.locationManager.delegate = context.coordinator
@@ -287,120 +276,17 @@ struct AppleMapView: UIViewRepresentable {
             )
         }
         
-        // MARK: - Gesture Handling
-        
-        @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
-            guard let mapView = mapView else { return }
-            
-            switch gesture.state {
-            case .began:
-                // Disable other gesture recognizers during pan
-                mapView.isScrollEnabled = false
-            case .changed:
-                // Handle pan movement
-                let translation = gesture.translation(in: mapView)
-                
-                // Convert translation to coordinate offset
-                let mapWidth = mapView.frame.size.width
-                let mapHeight = mapView.frame.size.height
-                let region = mapView.region
-                
-                // Calculate how much the map should move
-                let latitudeDelta = translation.y / mapHeight * region.span.latitudeDelta
-                let longitudeDelta = -translation.x / mapWidth * region.span.longitudeDelta
-                
-                // Create new center coordinate
-                let newCenter = CLLocationCoordinate2D(
-                    latitude: region.center.latitude + latitudeDelta,
-                    longitude: region.center.longitude + longitudeDelta
-                )
-                
-                // Update map region
-                mapView.setCenter(newCenter, animated: false)
-                
-                // Reset translation for continuous movement
-                gesture.setTranslation(.zero, in: mapView)
-                
-            case .ended, .cancelled, .failed:
-                // Re-enable scrolling
-                mapView.isScrollEnabled = true
-                // Update annotations after pan gesture ends
-                updateAnnotations()
-            default:
-                break
-            }
-        }
-        
-        @objc func handlePinchGesture(_ gesture: UIPinchGestureRecognizer) {
-            guard let mapView = mapView else { return }
-            
-            switch gesture.state {
-            case .began:
-                // Disable built-in zoom during our custom pinch
-                mapView.isZoomEnabled = false
-            case .changed:
-                // Get the pinch scale
-                let scale = gesture.scale
-                
-                // Get current region
-                var region = mapView.region
-                
-                // Calculate new span based on pinch scale
-                let factor = 1.0 / scale
-                
-                region.span.latitudeDelta *= factor
-                region.span.longitudeDelta *= factor
-                
-                // Update map region
-                mapView.setRegion(region, animated: false)
-                
-                // Reset scale for continuous zooming
-                gesture.scale = 1.0
-                
-            case .ended, .cancelled, .failed:
-                // Re-enable zooming
-                mapView.isZoomEnabled = true
-                // Update annotations after zoom gesture ends
-                updateAnnotations()
-            default:
-                break
-            }
-        }
-        
-        @objc func handleRotationGesture(_ gesture: UIRotationGestureRecognizer) {
-            guard let mapView = mapView else { return }
-            
-            switch gesture.state {
-            case .began:
-                // Disable built-in rotation during our custom rotation
-                mapView.isRotateEnabled = false
-            case .changed:
-                // Get the rotation angle
-                let rotation = gesture.rotation
-                
-                // Apply rotation to the map's camera
-                let camera = mapView.camera
-                camera.heading += rotation * (180 / .pi) // Convert radians to degrees
-                mapView.setCamera(camera, animated: false)
-                
-                // Reset rotation for continuous rotating
-                gesture.rotation = 0
-                
-            case .ended, .cancelled, .failed:
-                // Re-enable rotation
-                mapView.isRotateEnabled = true
-                // Update annotations after rotation gesture ends
-                updateAnnotations()
-            default:
-                break
-            }
-        }
-        
         // MARK: - UIGestureRecognizerDelegate
         
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-            // Allow simultaneous recognition of gestures
-            return true
+            // Only allow simultaneous recognition for specific gesture combinations
+            if gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer is UIPinchGestureRecognizer {
+                return true
+            }
+            if gestureRecognizer is UIPinchGestureRecognizer && otherGestureRecognizer is UIPanGestureRecognizer {
+                return true
+            }
+            return false
         }
         
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
