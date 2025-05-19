@@ -40,6 +40,24 @@ actual fun MapComponent(
     val screenWidthDp = configuration.screenWidthDp
     val screenHeightDp = configuration.screenHeightDp
 
+    // Function to find the nearest scooter to user's location
+    fun findNearestScooter(userLatLng: LatLng, scooters: List<Scooter>): Scooter? {
+        if (scooters.isEmpty()) return null
+        
+        return scooters.minByOrNull { scooter ->
+            val scooterLatLng = LatLng(scooter.latitude, scooter.longitude)
+            val distance = FloatArray(1)
+            Location.distanceBetween(
+                userLatLng.latitude,
+                userLatLng.longitude,
+                scooterLatLng.latitude,
+                scooterLatLng.longitude,
+                distance
+            )
+            distance[0]
+        }
+    }
+
     // Get user's location and move camera to it
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(
@@ -64,6 +82,23 @@ actual fun MapComponent(
                         }
                     }
                 }
+        }
+    }
+
+    // Update camera position when scooters list changes
+    LaunchedEffect(scooters, userLocation) {
+        userLocation?.let { userLatLng ->
+            val nearestScooter = findNearestScooter(userLatLng, scooters)
+            nearestScooter?.let { scooter ->
+                val scooterLatLng = LatLng(scooter.latitude, scooter.longitude)
+                coroutineScope.launch {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newCameraPosition(
+                            CameraPosition.fromLatLngZoom(scooterLatLng, 15f)
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -100,7 +135,10 @@ actual fun MapComponent(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(isMyLocationEnabled = true),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = true)
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = true,
+                mapToolbarEnabled = false // Disable the default toolbar
+            )
         ) {
             // Hoist the map reference so we can remember the cluster manager
             var mapRef by remember { mutableStateOf<com.google.android.gms.maps.GoogleMap?>(null) }

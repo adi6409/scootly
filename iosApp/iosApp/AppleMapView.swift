@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 import CoreLocation
 import UIKit
+import ComposeApp
 
 struct AppleMapView: UIViewRepresentable {
     @ObservedObject var mapData: ScooterMapData
@@ -11,14 +12,14 @@ struct AppleMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
-        mapView.showsUserLocation = true // Replaces isMyLocationEnabled
-        mapView.isRotateEnabled = true   // Replaces rotateGestures
-        mapView.isPitchEnabled = true    // Replaces tiltGestures
-        mapView.isZoomEnabled = true     // Replaces zoomGestures
-        mapView.isScrollEnabled = true   // Replaces scrollGestures
-        mapView.isUserInteractionEnabled = true
+        mapView.showsUserLocation = true
+        mapView.isRotateEnabled = true
+        mapView.isPitchEnabled = true
+        mapView.isZoomEnabled = true
+        mapView.isScrollEnabled = true
+        mapView.showsCallout = false
         
-        // Add explicit gesture recognizers to ensure they work properly
+        // Add gesture recognizers with proper delegate handling
         let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
         panGesture.delegate = context.coordinator
         mapView.addGestureRecognizer(panGesture)
@@ -27,10 +28,6 @@ struct AppleMapView: UIViewRepresentable {
         pinchGesture.delegate = context.coordinator
         mapView.addGestureRecognizer(pinchGesture)
         
-        let rotationGesture = UIRotationGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleRotationGesture(_:)))
-        rotationGesture.delegate = context.coordinator
-        mapView.addGestureRecognizer(rotationGesture)
-
         // Location updates
         context.coordinator.mapView = mapView
         context.coordinator.locationManager.delegate = context.coordinator
@@ -58,6 +55,7 @@ struct AppleMapView: UIViewRepresentable {
         var locationManager = CLLocationManager()
         var hasCenteredOnce = false
         var lastScooterCount = 0
+        var userLocation: CLLocation?
         
         init(_ parent: AppleMapView, mapData: ScooterMapData) {
             self.parent = parent
@@ -66,17 +64,20 @@ struct AppleMapView: UIViewRepresentable {
             print("AppleMapView.Coordinator: Initialized with \(mapData.scooters.count) scooters")
         }
 
-        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-            guard let loc = locations.last, !hasCenteredOnce else { return }
-            hasCenteredOnce = true
+        // Function to find the nearest scooter to user's location
+        private func findNearestScooter(to userLocation: CLLocation) -> Scooter? {
+            if mapData.scooters.isEmpty { return nil }
             
-            // Center the map on user location (replaces GMSCameraPosition)
-            let region = MKCoordinateRegion(
-                center: loc.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-            )
-            mapView?.setRegion(region, animated: true)
-            updateAnnotations()
+            return mapData.scooters.min(by: { scooter1, scooter2 in
+                let location1 = CLLocation(latitude: scooter1.latitude, longitude: scooter1.longitude)
+                let location2 = CLLocation(latitude: scooter2.latitude, longitude: scooter2.longitude)
+                return userLocation.distance(from: location1) < userLocation.distance(from: location2)
+            })
+        }
+
+        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            guard let loc = locations.last else { return }
+            userLocation = loc
         }
 
         func updateAnnotations() {
@@ -86,6 +87,36 @@ struct AppleMapView: UIViewRepresentable {
             }
             
             print("AppleMapView: updateAnnotations called with \(parent.mapData.scooters.count) scooters")
+            
+            // If this is the first time we're getting scooters and we have user location, focus on nearest scooter
+            if !hasCenteredOnce && !mapData.scooters.isEmpty, let userLoc = userLocation {
+                hasCenteredOnce = true
+                
+                // Find nearest scooter if available
+                if let nearestScooter = findNearestScooter(to: userLoc) {
+                    print("Nearest scooter: \(nearestScooter)")
+                    // Center the map on the nearest scooter with a closer zoom level
+                    let region = MKCoordinateRegion(
+                        center: CLLocationCoordinate2D(
+                            latitude: nearestScooter.latitude,
+                            longitude: nearestScooter.longitude
+                        ),
+                        span: MKCoordinateSpan(latitudeDelta: 0.0005, longitudeDelta: 0.0005) // Closer zoom level
+                    )
+                    mapView.setRegion(region, animated: true)
+                    
+                    // Find and select the annotation for the nearest scooter
+                    print("Called onScooterSelected from nearest scooter")
+                    selectScooter(scooter: nearestScooter)
+                } else {
+                    // Center on user location if no scooters available with a wider view
+                    let region = MKCoordinateRegion(
+                        center: userLoc.coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    )
+                    mapView.setRegion(region, animated: true)
+                }
+            }
             
             // Remove existing annotations
             let existingAnnotations = mapView.annotations.filter { !($0 is MKUserLocation) }
@@ -133,7 +164,8 @@ struct AppleMapView: UIViewRepresentable {
                     coordinate: coordinate,
                     title: s.providerName,
                     subtitle: s.id,
-                    iconUrl: s.providerIcon
+                    iconUrl: s.providerIcon,
+                    isSelected: false
                 )
                 annotations.append(annotation)
             }
@@ -274,9 +306,7 @@ struct AppleMapView: UIViewRepresentable {
                 let region = mapView.region
                 
                 // Calculate how much the map should move
-                // For latitude, moving finger down (positive y) should move map down (negative latitude)
                 let latitudeDelta = translation.y / mapHeight * region.span.latitudeDelta
-                // For longitude, moving finger right (positive x) should move map left (negative longitude)
                 let longitudeDelta = -translation.x / mapWidth * region.span.longitudeDelta
                 
                 // Create new center coordinate
@@ -316,7 +346,6 @@ struct AppleMapView: UIViewRepresentable {
                 var region = mapView.region
                 
                 // Calculate new span based on pinch scale
-                // Scale < 1 means zoom in, scale > 1 means zoom out
                 let factor = 1.0 / scale
                 
                 region.span.latitudeDelta *= factor
@@ -350,7 +379,7 @@ struct AppleMapView: UIViewRepresentable {
                 let rotation = gesture.rotation
                 
                 // Apply rotation to the map's camera
-                var camera = mapView.camera
+                let camera = mapView.camera
                 camera.heading += rotation * (180 / .pi) // Convert radians to degrees
                 mapView.setCamera(camera, animated: false)
                 
@@ -371,8 +400,12 @@ struct AppleMapView: UIViewRepresentable {
         
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
             // Allow simultaneous recognition of gestures
-            // This is important for complex gestures like pinch-and-pan
             return true
+        }
+        
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            // Only handle touches on the map view itself, not on annotations or other subviews
+            return touch.view == mapView
         }
         
         // MARK: - MKMapViewDelegate methods
@@ -407,16 +440,16 @@ struct AppleMapView: UIViewRepresentable {
                 if annotationView == nil {
                     // Create our custom annotation view
                     annotationView = ScooterAnnotationView(annotation: scooterAnnotation, reuseIdentifier: identifier, coordinator: self)
-                    annotationView?.canShowCallout = true
+                    annotationView?.canShowCallout = false
                     
                     // Make sure user interaction is enabled
                     annotationView?.isUserInteractionEnabled = true
                     
-                    print("AppleMapView: Created NEW ScooterAnnotationView with userInteractionEnabled: \(annotationView?.isUserInteractionEnabled ?? false)")
+//                    print("AppleMapView: Created NEW ScooterAnnotationView with userInteractionEnabled: \(annotationView?.isUserInteractionEnabled ?? false)")
                 } else {
                     // Update the annotation
                     annotationView?.annotation = scooterAnnotation
-                    print("AppleMapView: Reused ScooterAnnotationView with userInteractionEnabled: \(annotationView?.isUserInteractionEnabled ?? false)")
+//                    print("AppleMapView: Reused ScooterAnnotationView with userInteractionEnabled: \(annotationView?.isUserInteractionEnabled ?? false)")
                 }
                 
                 // Set a default icon immediately so annotation is visible
@@ -481,7 +514,7 @@ struct AppleMapView: UIViewRepresentable {
                     // Make sure the callback exists
                     if parent.mapData.onScooterSelected != nil {
                         print("AppleMapView: Direct tap - Calling onScooterSelected callback")
-                        parent.mapData.onScooterSelected?(scooter)
+                        selectScooter(scooter: scooter)
                     } else {
                         print("AppleMapView: Direct tap - onScooterSelected callback is nil")
                     }
@@ -518,7 +551,7 @@ struct AppleMapView: UIViewRepresentable {
                     // Make sure the callback exists
                     if parent.mapData.onScooterSelected != nil {
                         print("AppleMapView: Calling onScooterSelected callback")
-                        parent.mapData.onScooterSelected?(scooter)
+                        selectScooter(scooter: scooter)
                     } else {
                         print("AppleMapView: onScooterSelected callback is nil")
                     }
@@ -591,6 +624,21 @@ struct AppleMapView: UIViewRepresentable {
             
             return newImage ?? image
         }
+        
+        
+        func selectScooter(scooter: Scooter) {
+            if let annotation = mapView?.annotations.first(where: { annotation in
+                guard let scooterAnnotation = annotation as? ScooterAnnotation else { return false }
+                return abs(scooterAnnotation.coordinate.latitude - scooter.latitude) < 0.0001 &&
+                       abs(scooterAnnotation.coordinate.longitude - scooter.longitude) < 0.0001 &&
+                       scooterAnnotation.title == scooter.providerName
+            }) {
+                mapView?.selectAnnotation(annotation, animated: true)
+            }
+            
+            parent.mapData.onScooterSelected?(scooter)
+            
+        }
     }
 }
 
@@ -601,12 +649,14 @@ class ScooterAnnotation: NSObject, MKAnnotation {
     let title: String?
     let subtitle: String?
     let iconUrl: String?
+    let isSelected: Bool?
     
-    init(coordinate: CLLocationCoordinate2D, title: String?, subtitle: String?, iconUrl: String?) {
+    init(coordinate: CLLocationCoordinate2D, title: String?, subtitle: String?, iconUrl: String?, isSelected: Bool?) {
         self.coordinate = coordinate
         self.title = title
         self.subtitle = subtitle
         self.iconUrl = iconUrl
+        self.isSelected = isSelected
         super.init()
     }
 }

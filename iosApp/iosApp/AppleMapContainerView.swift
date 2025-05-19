@@ -13,18 +13,20 @@ struct AppleMapContainerView: View {
         GeometryReader { geometry in
             AppleMapView(mapData: mapData)
                 .edgesIgnoringSafeArea(.all)
-                // Disable SwiftUI gesture recognizers that might interfere with map gestures
-                .contentShape(Rectangle())
-                .allowsHitTesting(true)
-                // Make the view take up the full available space
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .onAppear {
                     print("AppleMapContainerView: onAppear with \(mapData.scooters.count) scooters")
                 }
+                // Add a transparent overlay to handle gesture conflicts
+                .overlay(
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in }
+                                .onEnded { _ in }
+                        )
+                )
         }
-        // Disable SwiftUI's gesture handling to prevent interference
-        .gesture(DragGesture(minimumDistance: 0).onChanged { _ in })
-        .gesture(MagnificationGesture().onChanged { _ in })
-        .gesture(RotationGesture().onChanged { _ in })
     }
 }
