@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
-import dev.astroianu.scootly.data.ProviderRepository
-import dev.astroianu.scootly.storage.SettingsStorage
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

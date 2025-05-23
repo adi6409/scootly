@@ -97,13 +97,19 @@ fun ScooterMapScreen() {
                         .background(MaterialTheme.colors.surface)
                         .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.2f))
                 ) {
-                    // This is an empty rectangle overlay as requested
-                    // You can add content here later if needed
                     Text(
-                        text = "Selected scooter: ${selectedScooter?.providerName} (ID: ${selectedScooter?.id})",
+                        text = "Selected scooter: ${selectedScooter?.providerName}",
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
+                    )
+                    // Scooter range
+                    Text(
+                        text = "Range: ${selectedScooter?.range?.div(1000)} km",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                            .padding(top = 50.dp)
                     )
                     // Close button
                     IconButton(
