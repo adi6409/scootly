@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mmk.kmpauth.firebase.apple.AppleButtonUiContainer
+import com.mmk.kmpauth.firebase.google.GoogleButtonUiContainerFirebase
 import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -19,6 +21,8 @@ import com.mohamedrejeb.calf.permissions.rememberPermissionState
 import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.permissions.PermissionStatus
 import io.github.aakira.napier.Napier
+import com.mmk.kmpauth.uihelper.apple.AppleSignInButton
+import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -33,8 +37,9 @@ fun OnboardingScreen(
     // Collect state
     val cities by viewModel.cities.collectAsState()
     val selectedCity by viewModel.selectedCity.collectAsState()
-//    val isLocationPermissionGranted by viewModel.isLocationPermissionGranted.collectAsState()
+    val authState by viewModel.authState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    
     // Local UI state
     var expanded by remember { mutableStateOf(false) }
     var currentStep by remember { mutableStateOf(0) }
@@ -62,7 +67,7 @@ fun OnboardingScreen(
         
         // Step indicator
         LinearProgressIndicator(
-            progress = (currentStep + 1) / 2f,
+            progress = (currentStep + 1) / 3f,
             modifier = Modifier.fillMaxWidth(0.8f)
         )
         
@@ -70,6 +75,74 @@ fun OnboardingScreen(
         
         when (currentStep) {
             0 -> {
+                // Authentication step
+                Text(
+                    text = "Sign in to continue",
+                    style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.Center
+                )
+                
+                when (authState) {
+                    is AuthState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+                    is AuthState.Error -> {
+                        Text(
+                            text = (authState as AuthState.Error).message,
+                            color = MaterialTheme.colors.error
+                        )
+                    }
+                    is AuthState.Authenticated -> {
+                        currentStep = 1
+                    }
+                    else -> {
+                        // Google Sign-In
+                        GoogleButtonUiContainerFirebase(
+                            onResult = { result ->
+                                result.onSuccess { user ->
+                                    if (user != null) {
+                                        currentStep = 1
+                                    }
+                                }
+                            }
+                        ) {
+                            GoogleSignInButton(
+                                modifier = Modifier.fillMaxWidth()
+                            ) { onClick() }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // Apple Sign-In
+                        AppleButtonUiContainer(
+                            onResult = { result ->
+                                Napier.d("Apple Sign-In result: $result")
+                                result.fold(
+                                    onSuccess = { user ->
+                                        Napier.d("Apple Sign-In user: $user")
+                                        if (user != null) {
+                                            currentStep = 1
+                                            Napier.d("Apple Sign-In successful, moving to next step")
+                                        } else {
+                                            Napier.e("Apple Sign-In failed, user is null")
+                                        }
+                                    },
+                                    onFailure = { exception ->
+                                        Napier.e("Apple Sign-In error: ${exception.message}")
+                                        Napier.e("Error cause: ${exception.cause}")
+                                        Napier.e("Stack trace: ${exception.stackTraceToString()}")
+                                    }
+                                )
+                            }
+                        ) {
+                            AppleSignInButton(
+                                modifier = Modifier.fillMaxWidth()
+                            ) { onClick() }
+                        }
+                    }
+                }
+            }
+            1 -> {
                 // Location permission step
                 Icon(
                     imageVector = Icons.Default.LocationOn,
@@ -93,7 +166,7 @@ fun OnboardingScreen(
                     )
                     Button(
                         onClick = {
-                            currentStep = 1
+                            currentStep = 2
                         },
                         modifier = Modifier.fillMaxWidth(0.8f)
                     ) {
@@ -116,7 +189,7 @@ fun OnboardingScreen(
                     }
                 }
             }
-            1 -> {
+            2 -> {
                 // City selection step
                 Text(
                     text = "Select your city",

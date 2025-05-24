@@ -2,8 +2,10 @@ package dev.astroianu.scootly.screens.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.astroianu.scootly.auth.FirebaseAuthService
 import dev.astroianu.scootly.data.ProviderRepository
 import dev.astroianu.scootly.storage.SettingsStorage
+import dev.gitlive.firebase.auth.FirebaseUser
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
 class OnboardingViewModel(
     private val providerRepository: ProviderRepository,
     private val settingsStorage: SettingsStorage,
+    private val firebaseAuthService: FirebaseAuthService,
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 ) : ViewModel() {
     
@@ -23,10 +26,12 @@ class OnboardingViewModel(
     private val _cities = MutableStateFlow<List<String>>(emptyList())
     private val _selectedCity = MutableStateFlow<String>("")
     private val _isLocationPermissionGranted = MutableStateFlow(false)
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     
     // Exposed state
     val cities: StateFlow<List<String>> = _cities.asStateFlow()
     val selectedCity: StateFlow<String> = _selectedCity.asStateFlow()
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     init {
         // Load cities
@@ -44,24 +49,31 @@ class OnboardingViewModel(
                 Napier.e("Error loading cities for onboarding", e)
             }
         }
+        
+        // Listen to auth state changes from FirebaseAuthService
+        viewModelScope.launch {
+            firebaseAuthService.currentUser.collect { user ->
+                _authState.value = if (user != null) {
+                    AuthState.Authenticated(user)
+                } else {
+                    AuthState.Initial
+                }
+            }
+        }
     }
     
-    /**
-     * Update the selected city
-     */
     suspend fun updateSelectedCity(city: String) {
         try {
             _selectedCity.value = city
             settingsStorage.setSelectedCity(city)
+            // Update user profile with selected city using FirebaseAuthService
+            firebaseAuthService.updateUserProfile(city)
             Napier.d("Updated selected city to: $city")
         } catch (e: Exception) {
             Napier.e("Error updating selected city", e)
         }
     }
     
-    /**
-     * Mark onboarding as completed
-     */
     suspend fun completeOnboarding() {
         try {
             settingsStorage.completeOnboarding()
@@ -70,4 +82,11 @@ class OnboardingViewModel(
             Napier.e("Error completing onboarding", e)
         }
     }
+}
+
+sealed class AuthState {
+    object Initial : AuthState()
+    object Loading : AuthState()
+    data class Authenticated(val user: FirebaseUser) : AuthState()
+    data class Error(val message: String) : AuthState()
 }

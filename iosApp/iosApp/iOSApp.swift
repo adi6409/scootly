@@ -1,6 +1,10 @@
 import SwiftUI
 import ComposeApp
 import CoreLocation
+import FirebaseCore
+import FirebaseAuth
+import FirebaseFirestore
+import GoogleSignIn
 
 class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     private let locationManager = CLLocationManager()
@@ -18,6 +22,7 @@ struct iOSApp: App {
     @StateObject private var locationManager = LocationManager()
     
     init() {
+        FirebaseApp.configure()
         KoinKt.doInitKoin()
     }
     

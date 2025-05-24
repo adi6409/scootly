@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "289196931253",
+    "project_id": "ding-23bbc",
+    "storage_bucket": "ding-23bbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289196931253:android:e986ae80fc48f1f7e5a6fc",
+        "android_client_info": {
+          "package_name": "dev.astroianu.scootly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ6jCz3poOq8c_WW3uvCJdqTAMdWbgoaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -25,6 +25,8 @@ import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import com.mmk.kmpauth.google.GoogleAuthCredentials
+import com.mmk.kmpauth.google.GoogleAuthProvider
 import dev.astroianu.scootly.navigation.MapTab
 import dev.astroianu.scootly.navigation.OnboardingVoyagerScreen
 import dev.astroianu.scootly.navigation.SettingsTab
@@ -63,6 +65,7 @@ fun App() {
     }
 
     val platform = remember { getPlatform() }
+    GoogleAuthProvider.create(credentials = GoogleAuthCredentials(serverId = "289196931253-2qioiodtj47jbpd8qmnk2lg7s94vto63.apps.googleusercontent.com"))
 
     AppTheme(platform = platform) {
         Navigator(OnboardingVoyagerScreen) { navigator ->

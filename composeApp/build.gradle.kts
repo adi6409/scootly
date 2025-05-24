@@ -59,6 +59,13 @@ kotlin {
             implementation(libs.calf.ui)
             implementation(libs.compose.cupertino)
             implementation(libs.compose.cupertino.icons)
+            
+            // KMPAuth dependencies
+            implementation(libs.kmpauth.google)
+            implementation(libs.kmpauth.firebase)
+            implementation(libs.kmpauth.uihelper)
+            implementation(libs.firebase.firestore)
+
         }
         androidMain.dependencies {
             implementation(compose.preview)
@@ -69,9 +76,10 @@ kotlin {
             implementation(libs.google.maps.compose.utils)
             implementation(libs.glide)
             implementation(libs.play.services.location)
-
-
         }
+
+
+
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
@@ -119,4 +127,12 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+
+// Apply Google Services plugin only for Android
+afterEvaluate {
+    if (project.plugins.hasPlugin("com.android.application")) {
+        apply(plugin = "com.google.gms.google-services")
+    }
 }

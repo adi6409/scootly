@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "289196931253",
+    "project_id": "ding-23bbc",
+    "storage_bucket": "ding-23bbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289196931253:android:e986ae80fc48f1f7e5a6fc",
+        "android_client_info": {
+          "package_name": "dev.astroianu.scootly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "289196931253-l2n02pkhg6l3c0rj3c4rho65716rastm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.astroianu.scootly",
+            "certificate_hash": "54e945cd1e5d204e6649226e5666e24ecc2bc839"
+          }
+        },
+        {
+          "client_id": "289196931253-2qioiodtj47jbpd8qmnk2lg7s94vto63.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ6jCz3poOq8c_WW3uvCJdqTAMdWbgoaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "289196931253-2qioiodtj47jbpd8qmnk2lg7s94vto63.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "289196931253-k5mqk0b4efeoi78p0hjr6dnh9cn3030o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dev.astroianu.scootly.Scootly",
+                "app_store_id": "6746136290"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
